@@ -247,209 +247,6 @@ class ViewVersion(BaseModel):
     default_namespace: Namespace = Field(..., alias='default-namespace')
 
 
-class BaseUpdate(BaseModel):
-    action: str
-
-
-class AssignUUIDUpdate(BaseUpdate):
-    """
-    Assigning a UUID to a table/view should only be done when creating the table/view. It is not safe to re-assign the UUID if a table/view already has a UUID assigned
-    """
-
-    action: Literal['assign-uuid']
-    uuid: str
-
-
-class UpgradeFormatVersionUpdate(BaseUpdate):
-    action: Literal['upgrade-format-version']
-    format_version: int = Field(..., alias='format-version')
-
-
-class SetCurrentSchemaUpdate(BaseUpdate):
-    action: Literal['set-current-schema']
-    schema_id: int = Field(
-        ...,
-        alias='schema-id',
-        description='Schema ID to set as current, or -1 to set last added schema',
-    )
-
-
-class AddPartitionSpecUpdate(BaseUpdate):
-    action: Literal['add-spec']
-    spec: PartitionSpec
-
-
-class SetDefaultSpecUpdate(BaseUpdate):
-    action: Literal['set-default-spec']
-    spec_id: int = Field(
-        ...,
-        alias='spec-id',
-        description='Partition spec ID to set as the default, or -1 to set last added spec',
-    )
-
-
-class AddSortOrderUpdate(BaseUpdate):
-    action: Literal['add-sort-order']
-    sort_order: SortOrder = Field(..., alias='sort-order')
-
-
-class SetDefaultSortOrderUpdate(BaseUpdate):
-    action: Literal['set-default-sort-order']
-    sort_order_id: int = Field(
-        ...,
-        alias='sort-order-id',
-        description='Sort order ID to set as the default, or -1 to set last added sort order',
-    )
-
-
-class AddSnapshotUpdate(BaseUpdate):
-    action: Literal['add-snapshot']
-    snapshot: Snapshot
-
-
-class SetSnapshotRefUpdate(BaseUpdate, SnapshotReference):
-    action: Literal['set-snapshot-ref']
-    ref_name: str = Field(..., alias='ref-name')
-
-
-class RemoveSnapshotsUpdate(BaseUpdate):
-    action: Literal['remove-snapshots']
-    snapshot_ids: List[int] = Field(..., alias='snapshot-ids')
-
-
-class RemoveSnapshotRefUpdate(BaseUpdate):
-    action: Literal['remove-snapshot-ref']
-    ref_name: str = Field(..., alias='ref-name')
-
-
-class SetLocationUpdate(BaseUpdate):
-    action: Literal['set-location']
-    location: str
-
-
-class SetPropertiesUpdate(BaseUpdate):
-    action: Literal['set-properties']
-    updates: Dict[str, str]
-
-
-class RemovePropertiesUpdate(BaseUpdate):
-    action: Literal['remove-properties']
-    removals: List[str]
-
-
-class AddViewVersionUpdate(BaseUpdate):
-    action: Literal['add-view-version']
-    view_version: ViewVersion = Field(..., alias='view-version')
-
-
-class SetCurrentViewVersionUpdate(BaseUpdate):
-    action: Literal['set-current-view-version']
-    view_version_id: int = Field(
-        ...,
-        alias='view-version-id',
-        description='The view version id to set as current, or -1 to set last added view version id',
-    )
-
-
-class RemoveStatisticsUpdate(BaseUpdate):
-    action: Literal['remove-statistics']
-    snapshot_id: int = Field(..., alias='snapshot-id')
-
-
-class RemovePartitionStatisticsUpdate(BaseUpdate):
-    action: Literal['remove-partition-statistics']
-    snapshot_id: int = Field(..., alias='snapshot-id')
-
-
-class TableRequirement(BaseModel):
-    type: str
-
-
-class AssertCreate(TableRequirement):
-    """
-    The table must not already exist; used for create transactions
-    """
-
-    type: Literal['assert-create']
-
-
-class AssertTableUUID(TableRequirement):
-    """
-    The table UUID must match the requirement's `uuid`
-    """
-
-    type: Literal['assert-table-uuid']
-    uuid: str
-
-
-class AssertRefSnapshotId(TableRequirement):
-    """
-    The table branch or tag identified by the requirement's `ref` must reference the requirement's `snapshot-id`; if `snapshot-id` is `null` or missing, the ref must not already exist
-    """
-
-    type: Literal['assert-ref-snapshot-id']
-    ref: str
-    snapshot_id: int = Field(..., alias='snapshot-id')
-
-
-class AssertLastAssignedFieldId(TableRequirement):
-    """
-    The table's last assigned column id must match the requirement's `last-assigned-field-id`
-    """
-
-    type: Literal['assert-last-assigned-field-id']
-    last_assigned_field_id: int = Field(..., alias='last-assigned-field-id')
-
-
-class AssertCurrentSchemaId(TableRequirement):
-    """
-    The table's current schema id must match the requirement's `current-schema-id`
-    """
-
-    type: Literal['assert-current-schema-id']
-    current_schema_id: int = Field(..., alias='current-schema-id')
-
-
-class AssertLastAssignedPartitionId(TableRequirement):
-    """
-    The table's last assigned partition id must match the requirement's `last-assigned-partition-id`
-    """
-
-    type: Literal['assert-last-assigned-partition-id']
-    last_assigned_partition_id: int = Field(..., alias='last-assigned-partition-id')
-
-
-class AssertDefaultSpecId(TableRequirement):
-    """
-    The table's default spec id must match the requirement's `default-spec-id`
-    """
-
-    type: Literal['assert-default-spec-id']
-    default_spec_id: int = Field(..., alias='default-spec-id')
-
-
-class AssertDefaultSortOrderId(TableRequirement):
-    """
-    The table's default sort order id must match the requirement's `default-sort-order-id`
-    """
-
-    type: Literal['assert-default-sort-order-id']
-    default_sort_order_id: int = Field(..., alias='default-sort-order-id')
-
-
-class ViewRequirement(BaseModel):
-    type: str
-
-
-class AssertViewUUID(ViewRequirement):
-    """
-    The view UUID must match the requirement's `uuid`
-    """
-
-    type: Literal['assert-view-uuid']
-    uuid: str
-
-
 class RegisterTableRequest(BaseModel):
     name: str
     metadata_location: str = Field(..., alias='metadata-location')
@@ -837,13 +634,6 @@ class TransformTerm(BaseModel):
     term: Reference
 
 
-class SetPartitionStatisticsUpdate(BaseUpdate):
-    action: Literal['set-partition-statistics']
-    partition_statistics: PartitionStatisticsFile = Field(
-        ..., alias='partition-statistics'
-    )
-
-
 class ReportMetricsRequest2(CommitReport):
     report_type: str = Field(..., alias='report-type')
 
@@ -899,12 +689,6 @@ class DataFile(ContentFile):
 
 class Term(BaseModel):
     __root__: Union[Reference, TransformTerm]
-
-
-class SetStatisticsUpdate(BaseUpdate):
-    action: Literal['set-statistics']
-    snapshot_id: int = Field(..., alias='snapshot-id')
-    statistics: StatisticsFile
 
 
 class UnaryExpression(BaseModel):
@@ -1020,16 +804,6 @@ class ViewMetadata(BaseModel):
     properties: Optional[Dict[str, str]] = None
 
 
-class AddSchemaUpdate(BaseUpdate):
-    action: Literal['add-schema']
-    schema_: Schema = Field(..., alias='schema')
-    last_column_id: Optional[int] = Field(
-        None,
-        alias='last-column-id',
-        description='The highest assigned column ID for the table. This is used to ensure columns are always assigned an unused ID when evolving schemas. When omitted, it will be computed on the server side.',
-    )
-
-
 class TableUpdate(BaseModel):
     __root__: Union[
         AssignUUIDUpdate,
@@ -1049,7 +823,9 @@ class TableUpdate(BaseModel):
         RemovePropertiesUpdate,
         SetStatisticsUpdate,
         RemoveStatisticsUpdate,
-    ]
+        SetPartitionStatisticsUpdate,
+        RemovePartitionStatisticsUpdate,
+    ] = Field(..., discriminator='action')
 
 
 class ViewUpdate(BaseModel):
@@ -1062,7 +838,24 @@ class ViewUpdate(BaseModel):
         RemovePropertiesUpdate,
         AddViewVersionUpdate,
         SetCurrentViewVersionUpdate,
-    ]
+    ] = Field(..., discriminator='action')
+
+
+class TableRequirement(BaseModel):
+    __root__: Union[
+        AssertCreate,
+        AssertTableUUID,
+        AssertRefSnapshotId,
+        AssertLastAssignedFieldId,
+        AssertCurrentSchemaId,
+        AssertLastAssignedPartitionId,
+        AssertDefaultSpecId,
+        AssertDefaultSortOrderId,
+    ] = Field(..., discriminator='type')
+
+
+class ViewRequirement(BaseModel):
+    __root__: AssertViewUUID = Field(..., discriminator='type')
 
 
 class LoadTableResult(BaseModel):
@@ -1196,6 +989,220 @@ class Schema(StructType):
     )
 
 
+class AssignUUIDUpdate(BaseModel):
+    """
+    Assigning a UUID to a table/view should only be done when creating the table/view. It is not safe to re-assign the UUID if a table/view already has a UUID assigned
+    """
+
+    action: Literal['assign-uuid']
+    uuid: str
+
+
+class UpgradeFormatVersionUpdate(BaseModel):
+    action: Literal['upgrade-format-version']
+    format_version: int = Field(..., alias='format-version')
+
+
+class AddSchemaUpdate(BaseModel):
+    action: Literal['add-schema']
+    schema_: Schema = Field(..., alias='schema')
+    last_column_id: Optional[int] = Field(
+        None,
+        alias='last-column-id',
+        description='The highest assigned column ID for the table. This is used to ensure columns are always assigned an unused ID when evolving schemas. When omitted, it will be computed on the server side.',
+    )
+
+
+class SetCurrentSchemaUpdate(BaseModel):
+    action: Literal['set-current-schema']
+    schema_id: int = Field(
+        ...,
+        alias='schema-id',
+        description='Schema ID to set as current, or -1 to set last added schema',
+    )
+
+
+class AddPartitionSpecUpdate(BaseModel):
+    action: Literal['add-spec']
+    spec: PartitionSpec
+
+
+class SetDefaultSpecUpdate(BaseModel):
+    action: Literal['set-default-spec']
+    spec_id: int = Field(
+        ...,
+        alias='spec-id',
+        description='Partition spec ID to set as the default, or -1 to set last added spec',
+    )
+
+
+class AddSortOrderUpdate(BaseModel):
+    action: Literal['add-sort-order']
+    sort_order: SortOrder = Field(..., alias='sort-order')
+
+
+class SetDefaultSortOrderUpdate(BaseModel):
+    action: Literal['set-default-sort-order']
+    sort_order_id: int = Field(
+        ...,
+        alias='sort-order-id',
+        description='Sort order ID to set as the default, or -1 to set last added sort order',
+    )
+
+
+class AddSnapshotUpdate(BaseModel):
+    action: Literal['add-snapshot']
+    snapshot: Snapshot
+
+
+class SetSnapshotRefUpdate(SnapshotReference):
+    action: Literal['set-snapshot-ref']
+    ref_name: str = Field(..., alias='ref-name')
+
+
+class RemoveSnapshotsUpdate(BaseModel):
+    action: Literal['remove-snapshots']
+    snapshot_ids: List[int] = Field(..., alias='snapshot-ids')
+
+
+class RemoveSnapshotRefUpdate(BaseModel):
+    action: Literal['remove-snapshot-ref']
+    ref_name: str = Field(..., alias='ref-name')
+
+
+class SetLocationUpdate(BaseModel):
+    action: Literal['set-location']
+    location: str
+
+
+class SetPropertiesUpdate(BaseModel):
+    action: Literal['set-properties']
+    updates: Dict[str, str]
+
+
+class RemovePropertiesUpdate(BaseModel):
+    action: Literal['remove-properties']
+    removals: List[str]
+
+
+class AddViewVersionUpdate(BaseModel):
+    action: Literal['add-view-version']
+    view_version: ViewVersion = Field(..., alias='view-version')
+
+
+class SetCurrentViewVersionUpdate(BaseModel):
+    action: Literal['set-current-view-version']
+    view_version_id: int = Field(
+        ...,
+        alias='view-version-id',
+        description='The view version id to set as current, or -1 to set last added view version id',
+    )
+
+
+class SetStatisticsUpdate(BaseModel):
+    action: Literal['set-statistics']
+    snapshot_id: int = Field(..., alias='snapshot-id')
+    statistics: StatisticsFile
+
+
+class RemoveStatisticsUpdate(BaseModel):
+    action: Literal['remove-statistics']
+    snapshot_id: int = Field(..., alias='snapshot-id')
+
+
+class SetPartitionStatisticsUpdate(BaseModel):
+    action: Literal['set-partition-statistics']
+    partition_statistics: PartitionStatisticsFile = Field(
+        ..., alias='partition-statistics'
+    )
+
+
+class RemovePartitionStatisticsUpdate(BaseModel):
+    action: Literal['remove-partition-statistics']
+    snapshot_id: int = Field(..., alias='snapshot-id')
+
+
+class AssertCreate(BaseModel):
+    """
+    The table must not already exist; used for create transactions
+    """
+
+    type: Literal['assert-create']
+
+
+class AssertTableUUID(BaseModel):
+    """
+    The table UUID must match the requirement's `uuid`
+    """
+
+    type: Literal['assert-table-uuid']
+    uuid: str
+
+
+class AssertRefSnapshotId(BaseModel):
+    """
+    The table branch or tag identified by the requirement's `ref` must reference the requirement's `snapshot-id`; if `snapshot-id` is `null` or missing, the ref must not already exist
+    """
+
+    type: Literal['assert-ref-snapshot-id']
+    ref: str
+    snapshot_id: int = Field(..., alias='snapshot-id')
+
+
+class AssertLastAssignedFieldId(BaseModel):
+    """
+    The table's last assigned column id must match the requirement's `last-assigned-field-id`
+    """
+
+    type: Literal['assert-last-assigned-field-id']
+    last_assigned_field_id: int = Field(..., alias='last-assigned-field-id')
+
+
+class AssertCurrentSchemaId(BaseModel):
+    """
+    The table's current schema id must match the requirement's `current-schema-id`
+    """
+
+    type: Literal['assert-current-schema-id']
+    current_schema_id: int = Field(..., alias='current-schema-id')
+
+
+class AssertLastAssignedPartitionId(BaseModel):
+    """
+    The table's last assigned partition id must match the requirement's `last-assigned-partition-id`
+    """
+
+    type: Literal['assert-last-assigned-partition-id']
+    last_assigned_partition_id: int = Field(..., alias='last-assigned-partition-id')
+
+
+class AssertDefaultSpecId(BaseModel):
+    """
+    The table's default spec id must match the requirement's `default-spec-id`
+    """
+
+    type: Literal['assert-default-spec-id']
+    default_spec_id: int = Field(..., alias='default-spec-id')
+
+
+class AssertDefaultSortOrderId(BaseModel):
+    """
+    The table's default sort order id must match the requirement's `default-sort-order-id`
+    """
+
+    type: Literal['assert-default-sort-order-id']
+    default_sort_order_id: int = Field(..., alias='default-sort-order-id')
+
+
+class AssertViewUUID(BaseModel):
+    """
+    The view UUID must match the requirement's `uuid`
+    """
+
+    type: Literal['assert-view-uuid']
+    uuid: str
+
+
 class ReportMetricsRequest1(ScanReport):
     report_type: str = Field(..., alias='report-type')
 
@@ -1206,7 +1213,40 @@ MapType.update_forward_refs()
 Expression.update_forward_refs()
 TableMetadata.update_forward_refs()
 ViewMetadata.update_forward_refs()
-AddSchemaUpdate.update_forward_refs()
+TableUpdate.update_forward_refs()
+ViewUpdate.update_forward_refs()
+TableRequirement.update_forward_refs()
+ViewRequirement.update_forward_refs()
 CreateTableRequest.update_forward_refs()
 CreateViewRequest.update_forward_refs()
 ReportMetricsRequest.update_forward_refs()
+AssignUUIDUpdate.update_forward_refs()
+UpgradeFormatVersionUpdate.update_forward_refs()
+AddSchemaUpdate.update_forward_refs()
+SetCurrentSchemaUpdate.update_forward_refs()
+AddPartitionSpecUpdate.update_forward_refs()
+SetDefaultSpecUpdate.update_forward_refs()
+AddSortOrderUpdate.update_forward_refs()
+SetDefaultSortOrderUpdate.update_forward_refs()
+AddSnapshotUpdate.update_forward_refs()
+SetSnapshotRefUpdate.update_forward_refs()
+RemoveSnapshotsUpdate.update_forward_refs()
+RemoveSnapshotRefUpdate.update_forward_refs()
+SetLocationUpdate.update_forward_refs()
+SetPropertiesUpdate.update_forward_refs()
+RemovePropertiesUpdate.update_forward_refs()
+AddViewVersionUpdate.update_forward_refs()
+SetCurrentViewVersionUpdate.update_forward_refs()
+SetStatisticsUpdate.update_forward_refs()
+RemoveStatisticsUpdate.update_forward_refs()
+SetPartitionStatisticsUpdate.update_forward_refs()
+RemovePartitionStatisticsUpdate.update_forward_refs()
+AssertCreate.update_forward_refs()
+AssertTableUUID.update_forward_refs()
+AssertRefSnapshotId.update_forward_refs()
+AssertLastAssignedFieldId.update_forward_refs()
+AssertCurrentSchemaId.update_forward_refs()
+AssertLastAssignedPartitionId.update_forward_refs()
+AssertDefaultSpecId.update_forward_refs()
+AssertDefaultSortOrderId.update_forward_refs()
+AssertViewUUID.update_forward_refs()
